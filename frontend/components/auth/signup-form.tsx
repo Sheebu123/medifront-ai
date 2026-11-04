@@ -47,7 +47,7 @@ export function SignupForm() {
     setLoading(false)
   }
 
-  return <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+  return <form className="space-y-4" method="post" onSubmit={handleSubmit} noValidate>
     {error && <AuthError message={error} />}
     {message && <p role="status" className="rounded-lg border border-[#c9ebe5] bg-[#effaf8] px-3 py-2.5 text-sm text-[#137b5b]">{message}</p>}
     <AuthField label="Full name" name="full_name" placeholder="Your full name" autoComplete="name" />
