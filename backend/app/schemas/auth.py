@@ -3,7 +3,7 @@
 from enum import Enum
 from uuid import UUID
 
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class UserRole(str, Enum):
@@ -16,14 +16,17 @@ class UserRole(str, Enum):
 
 
 class AuthenticatedUser(BaseModel):
-    """Supabase-verified identity and request token for RLS-scoped reads."""
+    """Supabase-verified identity plus optional presentation fields for onboarding."""
 
     user_id: UUID
-    access_token: SecretStr = Field(exclude=True, repr=False)
+    profile_full_name: str | None = Field(default=None, exclude=True, repr=False)
+    profile_phone: str | None = Field(default=None, exclude=True, repr=False)
 
 
 class Profile(BaseModel):
     """The profile fields already consumed by the Next.js frontend."""
+
+    model_config = ConfigDict(from_attributes=True)
 
     id: UUID
     full_name: str | None

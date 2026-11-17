@@ -44,6 +44,8 @@ class AppointmentStatusUpdate(BaseModel):
 class AppointmentResponse(BaseModel):
     """The complete appointment row exposed by the current schema."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     patient_id: UUID
     doctor_id: UUID
