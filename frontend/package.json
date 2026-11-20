@@ -1,11 +1,11 @@
 {
-  "name": "my-project",
+  "name": "medifront-ai-frontend",
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@12.3.4",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start"
   },
   "dependencies": {
