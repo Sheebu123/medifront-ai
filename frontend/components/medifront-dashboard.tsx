@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import AppointmentManagement from "@/components/appointments/appointment-management"
-import type { UserRole } from "@/lib/auth/server"
+import type { Profile, UserRole } from "@/lib/auth/server"
 import { LogoutButton } from "@/components/auth/logout-button"
 import {
   Activity,
@@ -115,12 +115,33 @@ function KioskView({ onNavigate }: { onNavigate: (view: ViewKey) => void }) {
 
 function AccessibilityIcon() { return <span className="accessibility-icon">A</span> }
 
-export default function MediFrontDashboard({ role }: { role?: UserRole }) {
+export default function MediFrontDashboard({
+  role,
+  profile,
+  userEmail,
+}: {
+  role?: UserRole
+  profile?: Profile
+  userEmail?: string
+}) {
   const [activeView, setActiveView] = useState<ViewKey>("Dashboard")
   const [mobileNav, setMobileNav] = useState(false)
   const [search, setSearch] = useState("")
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const [theme, setTheme] = useState<"light" | "dark">("light")
+
+  const displayName = profile?.full_name || (userEmail ? userEmail.split("@")[0] : "MediFront User")
+  const roleTitle = role ? role.charAt(0).toUpperCase() + role.slice(1) : "Staff"
+  const initials = profile?.full_name
+    ? profile.full_name
+        .split(" ")
+        .filter(Boolean)
+        .map((part) => part[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : displayName.slice(0, 2).toUpperCase()
+
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("medifront-theme")
     if (savedTheme === "dark" || savedTheme === "light") setTheme(savedTheme)
@@ -133,5 +154,5 @@ export default function MediFrontDashboard({ role }: { role?: UserRole }) {
   const isKiosk = activeView === "Kiosk"
   const filteredNav = useMemo(() => navGroups.map((group) => ({ ...group, items: group.items.filter((item) => item.label.toLowerCase().includes(search.toLowerCase())) })).filter((group) => group.items.length), [search])
   if (isKiosk) return <KioskView onNavigate={nav} />
-  return <div className="app-shell"><aside className={`sidebar ${mobileNav ? "open" : ""}`}><div className="brand"><div className="brand-mark"><Hospital size={19} /></div><div><strong>MEDIFRONT <span>AI</span></strong><small>Hospital operations</small></div><button className="mobile-close icon-button" onClick={() => setMobileNav(false)} aria-label="Close navigation"><X size={18} /></button></div><div className="sidebar-search"><Search size={15} /><input placeholder="Search menu" value={search} onChange={(e) => setSearch(e.target.value)} /></div><nav>{filteredNav.map((group) => <div className="nav-group" key={group.label}><p>{group.label}</p>{group.items.map(({ label, icon: Icon }) => <button key={label} className={`nav-item ${activeView === label ? "active" : ""}`} onClick={() => nav(label)}><Icon size={17} /><span>{label}</span>{label === "Alerts" && <span className="nav-count">3</span>}</button>)}</div>)}<div className="nav-group"><p>System</p><button className={`nav-item ${activeView === "Settings" ? "active" : ""}`} onClick={() => nav("Settings")}><Settings size={17} /><span>Settings</span></button><button className="nav-item" onClick={() => nav("Kiosk")}><LayoutDashboard size={17} /><span>Open kiosk mode</span></button></div></nav><div className="sidebar-bottom"><div className="system-status"><span className="live-dot" /><div><strong>Systems operational</strong><span>All services healthy</span></div></div><div className="profile"><div className="avatar">AS</div><div><strong>Dr. Ananya Sharma</strong><span>Hospital administrator</span></div><MoreHorizontal size={17} /></div></div></aside><div className={`sidebar-overlay ${mobileNav ? "show" : ""}`} onClick={() => setMobileNav(false)} /><main className="main"><header className="topbar"><div className="topbar-left"><button className="menu-button icon-button" onClick={() => setMobileNav(true)} aria-label="Open navigation"><Menu size={20} /></button><div className="crumb"><span>MediCare City Hospital</span><ArrowRight size={13} /><strong>{activeView}</strong></div></div><div className="topbar-actions"><div className="global-search"><Search size={16} /><input placeholder="Search patients, appointments..." /></div><button className="language-button"><Languages size={16} /> EN <ChevronDown size={13} /></button><button className="icon-button notification" aria-label="Notifications"><Bell size={18} /><span>3</span></button><div className="profile-menu"><button className="top-profile" aria-expanded={profileMenuOpen} aria-haspopup="menu" onClick={() => setProfileMenuOpen((open) => !open)}><div className="avatar small">AS</div><div><strong>Good morning, Dr. Sharma</strong><span>Tuesday, 16 September 2026</span></div><ChevronDown size={15} /></button>{profileMenuOpen && <div className="profile-popover" role="menu"><div className="profile-menu-label">Account</div><button className="profile-menu-item" role="menuitem"><Users size={15} /> Profile</button><button className="profile-menu-item" role="menuitem" onClick={() => setTheme(theme === "light" ? "dark" : "light")}>{theme === "light" ? <Moon size={15} /> : <Sun size={15} />} {theme === "light" ? "Dark mode" : "Light mode"}</button><div className="profile-menu-divider" /><LogoutButton /></div>}</div></div></header><div className="main-content">{activeView === "Dashboard" ? <DashboardView onNavigate={nav} role={role} /> : activeView === "Appointments" && (role === "patient" || role === "doctor") ? <AppointmentManagement role={role} /> : <GenericView view={activeView} onNavigate={nav} />}</div><div className="mobile-bottom-nav">{[{ label: "Dashboard", icon: LayoutDashboard }, { label: "Appointments", icon: CalendarDays }, { label: "Alerts", icon: AlertTriangle }, { label: "Kiosk", icon: Hospital }].map(({ label, icon: Icon }) => <button key={label} className={activeView === label ? "active" : ""} onClick={() => nav(label as ViewKey)}><Icon size={18} /><span>{label}</span></button>)}</div></main></div>
+  return <div className="app-shell"><aside className={`sidebar ${mobileNav ? "open" : ""}`}><div className="brand"><div className="brand-mark"><Hospital size={19} /></div><div><strong>MEDIFRONT <span>AI</span></strong><small>Hospital operations</small></div><button className="mobile-close icon-button" onClick={() => setMobileNav(false)} aria-label="Close navigation"><X size={18} /></button></div><div className="sidebar-search"><Search size={15} /><input placeholder="Search menu" value={search} onChange={(e) => setSearch(e.target.value)} /></div><nav>{filteredNav.map((group) => <div className="nav-group" key={group.label}><p>{group.label}</p>{group.items.map(({ label, icon: Icon }) => <button key={label} className={`nav-item ${activeView === label ? "active" : ""}`} onClick={() => nav(label)}><Icon size={17} /><span>{label}</span>{label === "Alerts" && <span className="nav-count">3</span>}</button>)}</div>)}<div className="nav-group"><p>System</p><button className={`nav-item ${activeView === "Settings" ? "active" : ""}`} onClick={() => nav("Settings")}><Settings size={17} /><span>Settings</span></button><button className="nav-item" onClick={() => nav("Kiosk")}><LayoutDashboard size={17} /><span>Open kiosk mode</span></button></div></nav><div className="sidebar-bottom"><div className="system-status"><span className="live-dot" /><div><strong>Systems operational</strong><span>All services healthy</span></div></div><div className="profile"><div className="avatar">{initials}</div><div><strong>{displayName}</strong><span>{roleTitle}</span></div></div></div></aside><div className={`sidebar-overlay ${mobileNav ? "show" : ""}`} onClick={() => setMobileNav(false)} /><main className="main"><header className="topbar"><div className="topbar-left"><button className="menu-button icon-button" onClick={() => setMobileNav(true)} aria-label="Open navigation"><Menu size={20} /></button><div className="crumb"><span>MediCare City Hospital</span><ArrowRight size={13} /><strong>{activeView}</strong></div></div><div className="topbar-actions"><div className="global-search"><Search size={16} /><input placeholder="Search patients, appointments..." /></div><button className="language-button"><Languages size={16} /> EN <ChevronDown size={13} /></button><button className="icon-button notification" aria-label="Notifications"><Bell size={18} /><span>3</span></button><div className="profile-menu"><button className="top-profile" aria-expanded={profileMenuOpen} aria-haspopup="menu" onClick={() => setProfileMenuOpen((open) => !open)}><div className="avatar small">{initials}</div><div><strong>{displayName}</strong><span>{roleTitle}</span></div><ChevronDown size={15} /></button>{profileMenuOpen && <div className="profile-popover" role="menu"><div className="profile-menu-label">Signed in as {roleTitle}</div>{userEmail && <div style={{ padding: "0 9px 6px", fontSize: "10px", color: "#8b9aaa", wordBreak: "break-all" }}>{userEmail}</div>}<button className="profile-menu-item" role="menuitem" onClick={() => setTheme(theme === "light" ? "dark" : "light")}>{theme === "light" ? <Moon size={15} /> : <Sun size={15} />} {theme === "light" ? "Dark mode" : "Light mode"}</button><div className="profile-menu-divider" /><LogoutButton /></div>}</div></div></header><div className="main-content">{activeView === "Dashboard" ? <DashboardView onNavigate={nav} role={role} /> : activeView === "Appointments" && (role === "patient" || role === "doctor") ? <AppointmentManagement role={role} /> : <GenericView view={activeView} onNavigate={nav} />}</div><div className="mobile-bottom-nav">{[{ label: "Dashboard", icon: LayoutDashboard }, { label: "Appointments", icon: CalendarDays }, { label: "Alerts", icon: AlertTriangle }, { label: "Kiosk", icon: Hospital }].map(({ label, icon: Icon }) => <button key={label} className={activeView === label ? "active" : ""} onClick={() => nav(label as ViewKey)}><Icon size={18} /><span>{label}</span></button>)}</div></main></div>
 }
