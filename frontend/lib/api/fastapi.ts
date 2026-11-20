@@ -1,7 +1,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
-import type { Appointment, AppointmentCreateInput } from '@/lib/appointments/types'
+import type { Appointment, AppointmentCreateInput, AppointmentStatus, Doctor } from '@/lib/appointments/types'
 
 export class FastApiError extends Error {
   constructor(
@@ -131,4 +131,18 @@ export function cancelAppointment(appointmentId: string): Promise<Appointment> {
   return request<Appointment>(`/appointments/${encodeURIComponent(appointmentId)}/cancel`, {
     method: 'PATCH',
   })
+}
+
+export function updateAppointmentStatus(
+  appointmentId: string,
+  status: AppointmentStatus,
+): Promise<Appointment> {
+  return request<Appointment>(`/appointments/${encodeURIComponent(appointmentId)}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  })
+}
+
+export function getDoctors(): Promise<Doctor[]> {
+  return request<Doctor[]>('/doctors', { method: 'GET' })
 }

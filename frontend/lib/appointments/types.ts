@@ -18,4 +18,10 @@ export type AppointmentCreateInput = {
   reason: string | null
 }
 
-export type AppointmentRole = 'patient' | 'doctor'
+export type AppointmentRole = 'patient' | 'doctor' | 'receptionist' | 'admin'
+
+export type Doctor = {
+  id: string
+  full_name: string | null
+  phone: string | null
+}
