@@ -4,11 +4,13 @@ from fastapi import APIRouter
 
 from app.api.appointments import router as appointments_router
 from app.api.auth import router as auth_router
+from app.api.doctors import router as doctors_router
 from app.core.config import API_VERSION, APP_TITLE
 
 router = APIRouter()
 router.include_router(auth_router)
 router.include_router(appointments_router)
+router.include_router(doctors_router)
 
 
 @router.get("/", tags=["general"])
